@@ -1,0 +1,451 @@
+﻿<!DOCTYPE html>
+<html lang="it">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Studio Inglese: Flashcard & Quiz</title>
+   <script src="https://cdn.tailwindcss.com"></script>
+   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+   <style>
+       body {
+           font-family: 'Inter', sans-serif;
+           -webkit-font-smoothing: antialiased;
+           -moz-osx-font-smoothing: grayscale;
+       }
+       /* Nasconde le viste non attive */
+       .view {
+           display: none;
+       }
+       .view.active {
+           display: block;
+           animation: fadeIn 0.5s ease-in-out;
+       }
+       @keyframes fadeIn {
+           from { opacity: 0; transform: translateY(10px); }
+           to { opacity: 1; transform: translateY(0); }
+       }
+       /* Stili per la Flashcard */
+       .flashcard-inner {
+           position: relative;
+           width: 100%;
+           height: 100%;
+           text-align: center;
+           transition: transform 0.6s;
+           transform-style: preserve-3d;
+       }
+       .is-flipped {
+           transform: rotateY(180deg);
+       }
+       .flashcard-front, .flashcard-back {
+           position: absolute;
+           width: 100%;
+           height: 100%;
+           -webkit-backface-visibility: hidden;
+           backface-visibility: hidden;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           padding: 2rem;
+           border-radius: 1rem;
+       }
+       .flashcard-back {
+           transform: rotateY(180deg);
+       }
+       /* Stili per il Tooltip di Traduzione */
+       #translation-tooltip {
+           pointer-events: none; /* Non deve intercettare i click */
+           opacity: 0;
+           transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+           transform: scale(0.95);
+       }
+       #translation-tooltip.visible {
+           opacity: 1;
+           transform: scale(1);
+       }
+   </style>
+</head>
+<body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+   <main class="w-full max-w-md mx-auto">
+
+       <!-- VISTA 1: INSERIMENTO DATI -->
+       <div id="data-entry-view" class="view active w-full">
+           <div class="bg-white p-6 rounded-2xl shadow-lg">
+               <h1 class="text-2xl font-bold text-center mb-2">Prepara il tuo Studio</h1>
+               <p class="text-center text-gray-500 mb-4">Incolla la tua lista nel formato `Inglese==Italiano`, una per riga.</p>
+               <textarea id="data-input" class="w-full h-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Es. Hello==Ciao"></textarea>
+               <button id="load-data-btn" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                   Inizia a Studiare
+               </button>
+               <p id="data-error" class="text-red-500 text-center mt-2 hidden">Per favore, inserisci dei dati validi (almeno 4 voci per il quiz).</p>
+           </div>
+       </div>
+
+       <!-- VISTA 2: SELEZIONE MODALITÀ -->
+       <div id="mode-selection-view" class="view w-full">
+           <div class="bg-white p-6 rounded-2xl shadow-lg text-center">
+               <h1 class="text-2xl font-bold mb-4">Scegli una Modalità</h1>
+               <div class="flex flex-col gap-4">
+                   <button id="select-flashcard-mode" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                       Modalità Flashcard
+                   </button>
+                   <button id="select-quiz-mode" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                       Modalità Quiz
+                   </button>
+               </div>
+                <button id="back-to-data-btn" class="mt-6 text-gray-500 hover:text-blue-600 transition">← Cambia lista</button>
+           </div>
+       </div>
+
+       <!-- VISTA 3: MODALITÀ FLASHCARD -->
+       <div id="flashcard-view" class="view w-full">
+           <h1 class="text-3xl font-bold text-center mb-2">Flashcard</h1>
+           <p id="flashcard-instruction" class="text-center text-gray-500 mb-4">Clicca sulla card per girarla.</p>
+           <div class="perspective-1000 w-full h-64 md:h-72 mb-4">
+               <div id="flashcard" class="flashcard-inner w-full h-full cursor-pointer shadow-xl rounded-2xl">
+                   <div id="card-front" class="flashcard-front bg-white border-2 border-blue-200">
+                       <p class="text-2xl md:text-3xl font-semibold"></p>
+                   </div>
+                   <div id="card-back" class="flashcard-back bg-blue-600 text-white">
+                        <p class="text-2xl md:text-3xl font-semibold"></p>
+                   </div>
+               </div>
+           </div>
+           <div class="flex flex-col sm:flex-row gap-4 justify-center">
+               <button id="swap-lang-btn-flashcard" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-5 rounded-lg transition-transform transform hover:scale-105">Inverti</button>
+               <button id="next-card-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-transform transform hover:scale-105">Prossima →</button>
+           </div>
+           <div id="card-counter" class="text-center text-gray-500 mt-4"></div>
+           <button id="back-to-menu-flashcard" class="block mx-auto mt-4 text-gray-500 hover:text-blue-600 transition">← Torna al Menu</button>
+       </div>
+
+       <!-- VISTA 4: MODALITÀ QUIZ -->
+       <div id="quiz-view" class="view w-full">
+           <h1 class="text-3xl font-bold text-center mb-2">Quiz</h1>
+           <p id="quiz-instruction" class="text-center text-gray-500 mb-4">Scegli la traduzione corretta.</p>
+           <div class="bg-white p-6 rounded-2xl shadow-lg">
+               <div id="quiz-question-container" class="text-center mb-6">
+                   <p class="text-lg text-gray-500 mb-1">Traduci:</p>
+                   <p id="quiz-question" class="text-2xl md:text-3xl font-bold"></p>
+               </div>
+               <div id="quiz-options" class="grid grid-cols-2 gap-3">
+                   <!-- Le opzioni del quiz verranno inserite qui da JS -->
+               </div>
+               <p id="quiz-feedback" class="text-center font-bold mt-4 h-6"></p>
+           </div>
+           <div class="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+                <button id="swap-lang-btn-quiz" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-5 rounded-lg transition-transform transform hover:scale-105">Inverti</button>
+               <button id="next-question-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-transform transform hover:scale-105 hidden">Prossima →</button>
+           </div>
+            <button id="back-to-menu-quiz" class="block mx-auto mt-4 text-gray-500 hover:text-blue-600 transition">← Torna al Menu</button>
+       </div>
+   </main>
+
+   <!-- Tooltip per la traduzione (globale) -->
+   <div id="translation-tooltip" class="hidden fixed bg-gray-800 text-white text-sm rounded-md px-3 py-2 shadow-lg z-50 max-w-xs text-center"></div>
+
+   <script>
+       // Elementi del DOM
+       const views = document.querySelectorAll('.view');
+       const dataInput = document.getElementById('data-input');
+       const loadDataBtn = document.getElementById('load-data-btn');
+       const dataError = document.getElementById('data-error');
+       
+       const selectFlashcardModeBtn = document.getElementById('select-flashcard-mode');
+       const selectQuizModeBtn = document.getElementById('select-quiz-mode');
+       const backToDataBtn = document.getElementById('back-to-data-btn');
+
+       // Elementi Flashcard
+       const flashcardView = document.getElementById('flashcard-view');
+       const flashcard = document.getElementById('flashcard');
+       const cardFrontText = document.querySelector('#card-front p');
+       const cardBackText = document.querySelector('#card-back p');
+       const nextCardBtn = document.getElementById('next-card-btn');
+       const swapLangBtnFlashcard = document.getElementById('swap-lang-btn-flashcard');
+       const cardCounter = document.getElementById('card-counter');
+       const flashcardInstruction = document.getElementById('flashcard-instruction');
+       const backToMenuFlashcard = document.getElementById('back-to-menu-flashcard');
+
+       // Elementi Quiz
+       const quizView = document.getElementById('quiz-view');
+       const quizQuestion = document.getElementById('quiz-question');
+       const quizOptionsContainer = document.getElementById('quiz-options');
+       const quizFeedback = document.getElementById('quiz-feedback');
+       const nextQuestionBtn = document.getElementById('next-question-btn');
+       const swapLangBtnQuiz = document.getElementById('swap-lang-btn-quiz');
+       const quizInstruction = document.getElementById('quiz-instruction');
+       const backToMenuQuiz = document.getElementById('back-to-menu-quiz');
+       
+       // Elemento Tooltip
+       const tooltip = document.getElementById('translation-tooltip');
+
+       // Stato dell'applicazione
+       let allCards = [];
+       let currentIndex = -1;
+       let shownIndices = [];
+       let italianFirst = true;
+       let currentQuizAnswer = '';
+       let longPressTimer;
+
+       // Dati di esempio
+       dataInput.value = `Once==una volta
+ALL I NEED TO DO IS SUCCEED ONCE==tutto ciò che devo fare è avere successo una volta
+To do succed==fare successo / avere successo
+Just once==soltanto una volta
+Just==appena/ solo/ soltanto/ esattamente / giusto o equo
+Alone==solo/sola
+Keep==continuano / perseverano/ tenere
+Gain==ottenere / acquisire / aumentare
+Met==incontrare / soddisfare /riunirsi
+Grow==crescere
+Must==dovere/ devo
+Even==anche
+Powerful==potente
+Bring==portare
+Treat==curare / trattare
+PERHAPS==forse, probabilmente
+LOOPHOLES==scappatoie
+Mistake==errore
+Maybe==forse, probabilmente
+HOW DARE YOU==come osi
+SPOUT SUCH NONSENSE==dire simili sciocchezze
+Mean==cattivo, meschino
+Wild==selvaggio, incontrollato
+Still==ancora
+Afraid==paura
+Fear==temere / paura
+Lift==alzare
+KNOWLEDGE==conoscenza
+Trust==fiducia
+begging==mendicare
+Bound==legato/ destinato
+Lied==mentito
+Care==cura, attenzione
+Blank==vuoto
+Stare==sguardo fisso
+HOWEVER==tuttavia
+Useful==utile
+Lack==mancanza
+WEAKLINGS==deboli
+Heat==calore
+DWARVES==nani
+WITHSTAND IT==resistergli
+Barely==appena`;
+
+       // --- GESTIONE VISTE ---
+       function showView(viewId) {
+           views.forEach(view => view.classList.remove('active'));
+           document.getElementById(viewId).classList.add('active');
+       }
+
+       // --- LOGICA DI CARICAMENTO DATI ---
+       function parseData(data) {
+           return data.trim().split('\n')
+               .map(line => {
+                   const parts = line.split('==');
+                   if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
+                       return { english: parts[0].trim(), italian: parts[1].trim() };
+                   }
+                   return null;
+               })
+               .filter(card => card !== null);
+       }
+
+       loadDataBtn.addEventListener('click', () => {
+           const parsedCards = parseData(dataInput.value);
+           // Il quiz ha bisogno di almeno 4 opzioni per funzionare correttamente
+           if (parsedCards.length >= 4) {
+               allCards = parsedCards;
+               dataError.classList.add('hidden');
+               showView('mode-selection-view');
+           } else {
+               dataError.classList.remove('hidden');
+           }
+       });
+
+       backToDataBtn.addEventListener('click', () => showView('data-entry-view'));
+
+       // --- SELEZIONE MODALITÀ ---
+       selectFlashcardModeBtn.addEventListener('click', () => {
+           setupFlashcardMode();
+           showView('flashcard-view');
+       });
+
+       selectQuizModeBtn.addEventListener('click', () => {
+           setupQuizMode();
+           showView('quiz-view');
+       });
+
+       backToMenuFlashcard.addEventListener('click', () => showView('mode-selection-view'));
+       backToMenuQuiz.addEventListener('click', () => showView('mode-selection-view'));
+
+       // --- LOGICA FLASHCARD (invariata) ---
+       function setupFlashcardMode() {
+           shownIndices = [];
+           updateFlashcardInstruction();
+           showNextCard();
+       }
+       function showNextCard() {
+           if (shownIndices.length === allCards.length) shownIndices = [];
+           do {
+               currentIndex = Math.floor(Math.random() * allCards.length);
+           } while (shownIndices.includes(currentIndex));
+           shownIndices.push(currentIndex);
+           const card = allCards[currentIndex];
+           flashcard.classList.remove('is-flipped');
+           setTimeout(() => {
+               cardFrontText.textContent = italianFirst ? card.italian : card.english;
+               cardBackText.textContent = italianFirst ? card.english : card.italian;
+           }, 150);
+           cardCounter.textContent = `Card ${shownIndices.length} di ${allCards.length}`;
+       }
+       function updateFlashcardInstruction() {
+           flashcardInstruction.textContent = italianFirst ? 'Italiano → Inglese' : 'Inglese → Italiano';
+       }
+       flashcard.addEventListener('click', () => flashcard.classList.toggle('is-flipped'));
+       nextCardBtn.addEventListener('click', showNextCard);
+       swapLangBtnFlashcard.addEventListener('click', () => {
+           italianFirst = !italianFirst;
+           updateFlashcardInstruction();
+           const card = allCards[currentIndex];
+           flashcard.classList.remove('is-flipped');
+           setTimeout(() => {
+               cardFrontText.textContent = italianFirst ? card.italian : card.english;
+               cardBackText.textContent = italianFirst ? card.english : card.italian;
+           }, 150);
+       });
+
+       // --- LOGICA QUIZ (con aggiunta long-press) ---
+       function setupQuizMode() {
+           updateQuizInstruction();
+           generateQuizQuestion();
+       }
+       
+       function updateQuizInstruction() {
+           quizInstruction.textContent = italianFirst ? 'Italiano → Inglese' : 'Inglese → Italiano';
+       }
+
+       function generateQuizQuestion() {
+           quizFeedback.textContent = '';
+           nextQuestionBtn.classList.add('hidden');
+           swapLangBtnQuiz.disabled = false;
+           
+           const correctCardIndex = Math.floor(Math.random() * allCards.length);
+           const correctCard = allCards[correctCardIndex];
+           const questionTerm = italianFirst ? correctCard.italian : correctCard.english;
+           currentQuizAnswer = italianFirst ? correctCard.english : correctCard.italian;
+           quizQuestion.textContent = questionTerm;
+
+           let options = [correctCard];
+           const otherCards = allCards.filter((_, index) => index !== correctCardIndex);
+           otherCards.sort(() => 0.5 - Math.random());
+           for (let i = 0; i < 3; i++) {
+               options.push(otherCards[i]);
+           }
+           options.sort(() => 0.5 - Math.random());
+
+           quizOptionsContainer.innerHTML = '';
+           options.forEach(card => {
+               const button = document.createElement('button');
+               button.className = "w-full p-3 bg-white border-2 border-gray-300 rounded-lg hover:bg-gray-100 hover:border-blue-500 transition text-sm md:text-base";
+               const optionText = italianFirst ? card.english : card.italian;
+               button.textContent = optionText;
+               // Salva la traduzione opposta per il tooltip
+               button.dataset.translation = italianFirst ? card.italian : card.english;
+               button.addEventListener('click', handleAnswerClick);
+               quizOptionsContainer.appendChild(button);
+           });
+       }
+
+       function handleAnswerClick(event) {
+           const selectedButton = event.target;
+           const selectedAnswer = selectedButton.textContent;
+           
+           swapLangBtnQuiz.disabled = true; // Blocca il cambio lingua dopo la risposta
+
+           const allButtons = quizOptionsContainer.querySelectorAll('button');
+           allButtons.forEach(btn => {
+               btn.removeEventListener('click', handleAnswerClick); // Rimuove il click handler
+               btn.disabled = true; // Disabilita il bottone per l'interazione standard
+               
+               // Mostra la risposta corretta
+               if (btn.textContent === currentQuizAnswer) {
+                   btn.className = "w-full p-3 border-2 rounded-lg bg-green-500 border-green-600 text-white";
+               }
+               
+               // Aggiunge gli event listener per il long-press
+               addLongPressListeners(btn);
+           });
+
+           if (selectedAnswer === currentQuizAnswer) {
+               quizFeedback.textContent = 'Corretto! 🎉';
+               quizFeedback.className = 'text-center font-bold mt-4 h-6 text-green-600';
+           } else {
+               selectedButton.className = "w-full p-3 border-2 rounded-lg bg-red-500 border-red-600 text-white";
+               quizFeedback.textContent = 'Sbagliato. 😕';
+               quizFeedback.className = 'text-center font-bold mt-4 h-6 text-red-600';
+           }
+           
+           nextQuestionBtn.classList.remove('hidden');
+       }
+
+       nextQuestionBtn.addEventListener('click', generateQuizQuestion);
+       swapLangBtnQuiz.addEventListener('click', () => {
+           italianFirst = !italianFirst;
+           updateQuizInstruction();
+           generateQuizQuestion();
+       });
+
+       // --- LOGICA LONG-PRESS E TOOLTIP ---
+       function addLongPressListeners(element) {
+           element.addEventListener('mousedown', handlePressStart);
+           element.addEventListener('touchstart', handlePressStart, { passive: true });
+           element.addEventListener('mouseup', handlePressEnd);
+           element.addEventListener('mouseleave', handlePressEnd);
+           element.addEventListener('touchend', handlePressEnd);
+       }
+
+       function handlePressStart(e) {
+           const button = e.currentTarget;
+           longPressTimer = setTimeout(() => {
+               const translation = button.dataset.translation;
+               const question = italianFirst ? button.textContent : translation;
+               const answer = italianFirst ? translation : button.textContent;
+               
+               showTooltip(button, `<b>${question}</b><br>${answer}`);
+           }, 500); // Mezzo secondo di attesa
+       }
+
+       function handlePressEnd(e) {
+           clearTimeout(longPressTimer);
+           hideTooltip();
+       }
+
+       function showTooltip(element, text) {
+           tooltip.innerHTML = text;
+           const rect = element.getBoundingClientRect();
+           
+           // Posiziona il tooltip sopra il pulsante
+           tooltip.style.left = `${rect.left + rect.width / 2}px`;
+           tooltip.style.top = `${rect.top}px`;
+           tooltip.style.transform = 'translate(-50%, -110%)'; // Sposta sopra e centra
+           
+           tooltip.classList.remove('hidden');
+           // Forza un reflow per l'animazione
+           void tooltip.offsetWidth; 
+           tooltip.classList.add('visible');
+       }
+
+       function hideTooltip() {
+           tooltip.classList.remove('visible');
+           // Nasconde l'elemento dopo la fine della transizione
+           setTimeout(() => {
+                tooltip.classList.add('hidden');
+           }, 200);
+       }
+
+       // --- INIZIALIZZAZIONE ---
+       showView('data-entry-view');
+   </script>
+</body>
+</html>
