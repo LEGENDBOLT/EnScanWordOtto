@@ -1,0 +1,2 @@
+# EnScanWordOtto
+EN learn Manga 
