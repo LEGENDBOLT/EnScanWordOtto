@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
    <meta charset="UTF-8">
@@ -6,135 +6,36 @@
    <title>Studio Inglese: Flashcard & Quiz</title>
    <script src="https://cdn.tailwindcss.com"></script>
    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-   <!-- Icone per le impostazioni -->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
    <style>
-       body {
-           font-family: 'Inter', sans-serif;
-           -webkit-font-smoothing: antialiased;
-           -moz-osx-font-smoothing: grayscale;
-       }
-       /* Nasconde le viste non attive */
-       .view {
-           display: none;
-       }
-       .view.active {
-           display: block;
-           animation: fadeIn 0.5s ease-in-out;
-       }
-       @keyframes fadeIn {
-           from { opacity: 0; transform: translateY(10px); }
-           to { opacity: 1; transform: translateY(0); }
-       }
-       /* Stili per la Flashcard */
-       .flashcard-inner {
-           position: relative;
-           width: 100%;
-           height: 100%;
-           text-align: center;
-           transition: transform 0.6s;
-           transform-style: preserve-3d;
-       }
-       .is-flipped {
-           transform: rotateY(180deg);
-       }
-       .flashcard-front, .flashcard-back {
-           position: absolute;
-           width: 100%;
-           height: 100%;
-           -webkit-backface-visibility: hidden;
-           backface-visibility: hidden;
-           display: flex;
-           align-items: center;
-           justify-content: center;
-           padding: 2rem;
-           border-radius: 1rem;
-           box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-       }
-       .flashcard-back {
-           transform: rotateY(180deg);
-       }
-       /* Stili per il Tooltip di Traduzione */
-       #translation-tooltip {
-           pointer-events: none;
-           opacity: 0;
-           transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-           transform: scale(0.95);
-       }
-       #translation-tooltip.visible {
-           opacity: 1;
-           transform: scale(1);
-       }
-       /* Aggiungi stili per il salvataggio */
-       .save-dialog, .settings-dialog {
-           transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-           transform: scale(0.95);
-           opacity: 0;
-           visibility: hidden;
-       }
-       .save-dialog.show, .settings-dialog.show {
-           transform: scale(1);
-           opacity: 1;
-           visibility: visible;
-       }
-       .text-overlay {
-           position: absolute;
-           top: 0;
-           left: 0;
-           width: 100%;
-           height: 100%;
-           background-color: rgba(0, 0, 0, 0.6);
-           backdrop-filter: blur(5px);
-           z-index: 40; /* Sotto il dialogo, sopra tutto il resto */
-       }
-       /* Stili per i pulsanti del quiz */
-       .quiz-option {
-           transition: border-color 0.2s, background-color 0.2s, transform 0.2s, color 0.2s;
-       }
-       .quiz-option:hover {
-           transform: scale(1.02);
-       }
-       /* Stili per il gioco Abbinamento */
-       .match-option {
-           cursor: pointer;
-           transition: border-color 0.2s, transform 0.2s;
-           border-width: 2px;
-       }
-       .match-option.selected {
-           border-color: #3b82f6; /* bg-blue-500 */
-           border-width: 4px;
-           transform: scale(1.05);
-       }
-       .match-option.matched {
-           background-color: #10b981; /* bg-green-500 */
-           color: white;
-           pointer-events: none;
-           opacity: 0.6;
-           transform: scale(1.02);
-           border-color: #10b981;
-       }
-       /* Stili per le opzioni del quiz dopo la risposta */
-       .quiz-option.selected-correct {
-           background-color: #d1fae5; /* bg-green-100 */
-           border-color: #10b981; /* border-green-500 */
-           border-width: 4px;
-       }
-       .quiz-option.selected-incorrect {
-           background-color: #fee2e2; /* bg-red-100 */
-           border-color: #ef4444; /* border-red-500 */
-           border-width: 4px;
-       }
-       .quiz-option.correct-answer {
-           background-color: #d1fae5; /* bg-green-100 */
-           border-color: #10b981; /* border-green-500 */
-           border-width: 4px;
-       }
+       body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+       .view { display: none; }
+       .view.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+       @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+       .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
+       .is-flipped { transform: rotateY(180deg); }
+       .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 2rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+       .flashcard-back { transform: rotateY(180deg); }
+       .modal-dialog { transition: transform 0.3s ease-out, opacity 0.3s ease-out; transform: scale(0.95); opacity: 0; visibility: hidden; }
+       .modal-dialog.show { transform: scale(1); opacity: 1; visibility: visible; }
+       .text-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); z-index: 40; }
+       .quiz-option, .match-option { transition: all 0.2s ease-in-out; }
+       .quiz-option:hover, .match-option:hover { transform: scale(1.02); }
+       .match-option.selected { border-color: #3b82f6; border-width: 4px; transform: scale(1.05); }
+       .match-option.matched { background-color: #10b981; color: white; pointer-events: none; opacity: 0.6; transform: scale(1.02); border-color: #10b981; }
+       .quiz-option.selected-correct { background-color: #d1fae5; border-color: #10b981; border-width: 4px; }
+       .quiz-option.selected-incorrect { background-color: #fee2e2; border-color: #ef4444; border-width: 4px; }
+       .quiz-option.correct-answer { background-color: #d1fae5; border-color: #10b981; border-width: 4px; }
+       #chat-window, #quick-chat-window { height: 300px; overflow-y: auto; }
+       .user-message { text-align: right; }
+       .user-message .message-bubble { background-color: #3b82f6; color: white; }
+       .bot-message .message-bubble { background-color: #e5e7eb; color: #1f2937; }
+       .message-bubble { display: inline-block; padding: 0.5rem 1rem; border-radius: 1.25rem; max-width: 80%; margin-top: 0.5rem; text-align: left; }
    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 flex items-center justify-center min-h-screen p-4">
 
    <main class="w-full max-w-md mx-auto relative">
-       <!-- Pulsante Impostazioni globale -->
        <button id="settings-btn" class="absolute top-4 right-4 bg-gray-200 hover:bg-gray-300 text-gray-700 w-10 h-10 rounded-full flex items-center justify-center transition-transform transform hover:rotate-90 z-20">
            <i class="fas fa-cog"></i>
        </button>
@@ -143,25 +44,33 @@
        <div id="data-entry-view" class="view w-full">
            <div class="bg-white p-6 rounded-2xl shadow-lg">
                <h1 class="text-2xl font-bold text-center mb-2">Prepara il tuo Studio</h1>
-               <p class="text-center text-gray-500 mb-4">Incolla la tua lista nel formato `Inglese==Italiano`, una per riga.</p>
+               <p class="text-center text-gray-500 mb-4">Incolla la tua lista (`Inglese==Italiano`) o creane una con l'AI.</p>
+
+               <div id="api-key-container-main" class="mb-4 p-4 bg-gray-100 rounded-lg">
+                    <label for="api-key-input-main" class="block text-sm font-medium text-gray-700 mb-1">Chiave API Google AI:</label>
+                    <input type="password" id="api-key-input-main" class="w-full p-2 border border-gray-300 rounded-lg" placeholder="Incolla la tua chiave API qui">
+                    <div class="flex items-center mt-2">
+                        <input type="checkbox" id="save-api-key-checkbox-main" class="form-checkbox h-4 w-4 text-indigo-600">
+                        <label for="save-api-key-checkbox-main" class="ml-2 block text-sm text-gray-900">Salva chiave API (nel browser)</label>
+                    </div>
+                </div>
 
                <div id="list-selection-container" class="mb-4">
                    <h2 class="text-lg font-semibold mb-2">Seleziona una lista salvata:</h2>
                    <select id="saved-lists-select" class="w-full p-2 border border-gray-300 rounded-lg"></select>
-                   <button id="load-saved-list-btn" class="w-full mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                       Carica Lista
-                   </button>
-                   <button id="delete-list-btn" class="w-full mt-2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                       Cancella Lista
-                   </button>
+                   <div class="grid grid-cols-2 gap-2 mt-2">
+                        <button id="load-saved-list-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">Carica Lista</button>
+                        <button id="delete-list-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">Cancella Lista</button>
+                   </div>
                </div>
                <hr class="my-4">
 
                <h2 class="text-lg font-semibold mb-2">Oppure crea una nuova lista:</h2>
                <textarea id="data-input" class="w-full h-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="Es. Hello==Ciao"></textarea>
-               <button id="load-data-btn" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                   Inizia a Studiare
-               </button>
+               <div class="grid grid-cols-2 gap-2 mt-4">
+                   <button id="load-data-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Inizia a Studiare</button>
+                   <button id="ai-generate-list-btn" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Chiedi all'AI</button>
+               </div>
                <p id="data-error" class="text-red-500 text-center mt-2 hidden">Per favore, inserisci dei dati validi (almeno 4 voci per i giochi).</p>
            </div>
        </div>
@@ -171,18 +80,11 @@
            <div class="bg-white p-6 rounded-2xl shadow-lg text-center">
                <h1 class="text-2xl font-bold mb-4">Scegli una Modalità</h1>
                <div class="flex flex-col gap-4">
-                   <button id="select-flashcard-mode" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                       Modalità Flashcard
-                   </button>
-                   <button id="select-quiz-mode" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                       Modalità Quiz
-                   </button>
-                   <button id="select-match-mode" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                       Abbina le Coppie
-                   </button>
-                   <button id="select-review-mode" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 hidden">
-                       Rivedi Errori
-                   </button>
+                   <button id="select-flashcard-mode" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Modalità Flashcard</button>
+                   <button id="select-quiz-mode" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Modalità Quiz</button>
+                   <button id="select-match-mode" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Abbina le Coppie</button>
+                    <button id="select-chat-mode" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Pratica con l'AI</button>
+                   <button id="select-review-mode" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105 hidden">Rivedi Errori</button>
                </div>
                <button id="back-to-data-btn" class="mt-6 text-gray-500 hover:text-blue-600 transition">← Cambia lista</button>
            </div>
@@ -203,8 +105,9 @@
                </div>
            </div>
            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-               <button id="swap-lang-btn-flashcard" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-5 rounded-lg transition-transform transform hover:scale-105">Inverti</button>
-               <button id="next-card-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-transform transform hover:scale-105">Prossima →</button>
+               <button id="swap-lang-btn-flashcard" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-5 rounded-lg">Inverti</button>
+               <button id="next-card-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg">Prossima →</button>
+               <button id="quick-chat-flashcard-btn" class="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-lg">Chiedi all'AI</button>
            </div>
            <div id="card-counter" class="text-center text-gray-500 mt-4"></div>
            <button id="back-to-menu-flashcard" class="block mx-auto mt-4 text-gray-500 hover:text-blue-600 transition">← Torna al Menu</button>
@@ -219,14 +122,13 @@
                    <p class="text-lg text-gray-500 mb-1">Traduci:</p>
                    <p id="quiz-question" class="text-2xl md:text-3xl font-bold"></p>
                </div>
-               <div id="quiz-options" class="grid grid-cols-2 gap-3">
-                   <!-- Le opzioni del quiz verranno inserite qui da JS -->
-               </div>
+               <div id="quiz-options" class="grid grid-cols-2 gap-3"></div>
                <p id="quiz-feedback" class="text-center font-bold mt-4 h-6"></p>
            </div>
            <div class="flex flex-col sm:flex-row gap-4 justify-center mt-4">
-               <button id="swap-lang-btn-quiz" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-5 rounded-lg transition-transform transform hover:scale-105">Inverti</button>
-               <button id="next-question-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-transform transform hover:scale-105 hidden">Prossima →</button>
+               <button id="swap-lang-btn-quiz" class="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-5 rounded-lg">Inverti</button>
+               <button id="next-question-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg hidden">Prossima →</button>
+               <button id="quick-chat-quiz-btn" class="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-lg">Chiedi all'AI</button>
            </div>
            <button id="back-to-menu-quiz" class="block mx-auto mt-4 text-gray-500 hover:text-blue-600 transition">← Torna al Menu</button>
        </div>
@@ -236,36 +138,42 @@
            <h1 class="text-3xl font-bold text-center mb-2">Abbina le Coppie</h1>
            <p id="match-instruction" class="text-center text-gray-500 mb-4">Abbina le parole. Ne mancano <span id="match-remaining-count" class="font-bold"></span>.</p>
            <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col md:flex-row gap-4 justify-center items-center">
-               <div id="match-english-column" class="flex-1 w-full md:w-auto space-y-2">
-                   <!-- Le opzioni in inglese verranno inserite qui da JS -->
-               </div>
-               <!-- Separatore visibile su tutti i dispositivi -->
+               <div id="match-english-column" class="flex-1 w-full md:w-auto space-y-2"></div>
                <div class="w-full h-px bg-blue-500 md:w-px md:h-auto md:my-0 md:mx-4"></div>
-               <div id="match-italian-column" class="flex-1 w-full md:w-auto space-y-2">
-                   <!-- Le opzioni in italiano verranno inserite qui da JS -->
-               </div>
+               <div id="match-italian-column" class="flex-1 w-full md:w-auto space-y-2"></div>
            </div>
-           <div id="match-game-buttons" class="flex flex-col sm:flex-row gap-4 justify-center mt-4">
-               <button id="next-match-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-transform transform hover:scale-105 hidden">
-                   Prossimo Set →
-               </button>
-               <button id="restart-match-btn" class="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-transform transform hover:scale-105">
-                   Ricomincia
-               </button>
+           <div class="flex flex-col sm:flex-row gap-4 justify-center mt-4">
+               <button id="next-match-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg hidden">Prossimo Set →</button>
+               <button id="restart-match-btn" class="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-5 rounded-lg">Ricomincia</button>
+               <button id="quick-chat-match-btn" class="w-full sm:w-auto bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-5 rounded-lg">Chiedi all'AI</button>
            </div>
            <button id="back-to-menu-match" class="block mx-auto mt-4 text-gray-500 hover:text-blue-600 transition">← Torna al Menu</button>
        </div>
+
+        <!-- VISTA 6: CHATBOT AI -->
+        <div id="chat-view" class="view w-full">
+            <h1 class="text-3xl font-bold text-center mb-2">Pratica con l'AI</h1>
+            <p class="text-center text-gray-500 mb-4">Fai conversazione, chiedi traduzioni o grammatica.</p>
+            <div class="bg-white p-6 rounded-2xl shadow-lg">
+                <div id="chat-window" class="w-full bg-gray-100 rounded-lg p-4 border border-gray-200 mb-4"></div>
+                <div class="flex gap-2">
+                    <input type="text" id="chat-input" class="flex-grow p-3 border border-gray-300 rounded-lg" placeholder="Scrivi il tuo messaggio...">
+                    <button id="chat-send-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-5 rounded-lg">Invia</button>
+                </div>
+            </div>
+            <button id="back-to-menu-chat" class="block mx-auto mt-4 text-gray-500 hover:text-blue-600 transition">← Torna al Menu</button>
+        </div>
+        <footer class="text-center text-gray-400 text-xs mt-4 pb-4">
+            <p>Creata da Gabriele Ottonelli</p>
+        </footer>
    </main>
 
-   <!-- Tooltip per la traduzione (globale) -->
-   <div id="translation-tooltip" class="hidden fixed bg-gray-800 text-white text-sm rounded-md px-3 py-2 shadow-lg z-50 max-w-xs text-center"></div>
-
-   <!-- Modale per salvare la lista -->
+   <!-- MODALI -->
    <div id="save-list-modal" class="fixed inset-0 flex items-center justify-center z-50 p-4 hidden">
        <div class="text-overlay absolute inset-0"></div>
-       <div class="save-dialog bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm z-50 transform">
+       <div class="modal-dialog bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm z-50">
            <h2 class="text-xl font-bold mb-4">Salva la tua lista</h2>
-           <input type="text" id="list-name-input" placeholder="Nome della lista" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+           <input type="text" id="list-name-input" placeholder="Nome della lista" class="w-full p-3 border border-gray-300 rounded-lg mb-4">
            <div class="flex justify-end space-x-2">
                <button id="cancel-save-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Annulla</button>
                <button id="confirm-save-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Salva</button>
@@ -273,28 +181,21 @@
        </div>
    </div>
 
-   <!-- Modale Impostazioni -->
    <div id="settings-modal" class="fixed inset-0 flex items-center justify-center z-50 p-4 hidden">
        <div class="text-overlay absolute inset-0"></div>
-       <div class="settings-dialog bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm z-50 transform">
+       <div class="modal-dialog bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm z-50">
            <h2 class="text-xl font-bold mb-4">Impostazioni</h2>
            <div class="space-y-4">
                <div>
                    <label class="block text-gray-700 font-medium mb-1">Ordine Flashcard:</label>
                    <div class="flex items-center space-x-4">
-                       <label class="inline-flex items-center">
-                           <input type="radio" name="flashcard-order" value="random" checked class="form-radio text-blue-600">
-                           <span class="ml-2">Casuale</span>
-                       </label>
-                       <label class="inline-flex items-center">
-                           <input type="radio" name="flashcard-order" value="sequential" class="form-radio text-blue-600">
-                           <span class="ml-2">Sequenziale</span>
-                       </label>
+                       <label class="inline-flex items-center"><input type="radio" name="flashcard-order" value="random" checked class="form-radio text-blue-600"><span class="ml-2">Casuale</span></label>
+                       <label class="inline-flex items-center"><input type="radio" name="flashcard-order" value="sequential" class="form-radio text-blue-600"><span class="ml-2">Sequenziale</span></label>
                    </div>
                </div>
                <div>
                    <label for="quiz-options-count" class="block text-gray-700 font-medium mb-1">Numero di opzioni del quiz:</label>
-                   <select id="quiz-options-count" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                   <select id="quiz-options-count" class="w-full p-2 border border-gray-300 rounded-lg">
                        <option value="4">4</option>
                        <option value="6">6</option>
                        <option value="8">8</option>
@@ -307,632 +208,597 @@
        </div>
    </div>
 
-   <!-- Script -->
+    <div id="quick-chat-modal" class="fixed inset-0 flex items-center justify-center z-50 p-4 hidden">
+        <div class="text-overlay absolute inset-0"></div>
+        <div class="modal-dialog bg-white p-6 rounded-2xl shadow-2xl w-full max-w-sm z-50">
+            <h2 class="text-xl font-bold mb-4">Quick Chat AI</h2>
+            <div id="quick-chat-window" class="w-full bg-gray-100 rounded-lg p-4 border mb-4" style="height: 300px; overflow-y: auto;"></div>
+            <div class="flex gap-2">
+                <input type="text" id="quick-chat-input" class="flex-grow p-3 border rounded-lg" placeholder="Fai una domanda...">
+                <button id="quick-chat-send-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg">Invia</button>
+            </div>
+            <button id="close-quick-chat-btn" class="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Chiudi</button>
+        </div>
+    </div>
+
    <script>
-       // Elementi del DOM
-       const views = document.querySelectorAll('.view');
-       const dataInput = document.getElementById('data-input');
-       const loadDataBtn = document.getElementById('load-data-btn');
-       const dataError = document.getElementById('data-error');
-       const selectFlashcardModeBtn = document.getElementById('select-flashcard-mode');
-       const selectQuizModeBtn = document.getElementById('select-quiz-mode');
-       const selectMatchModeBtn = document.getElementById('select-match-mode');
-       const selectReviewModeBtn = document.getElementById('select-review-mode');
-       const backToDataBtn = document.getElementById('back-to-data-btn');
-       const flashcardView = document.getElementById('flashcard-view');
-       const flashcard = document.getElementById('flashcard');
-       const cardFrontText = document.querySelector('#card-front p');
-       const cardBackText = document.querySelector('#card-back p');
-       const nextCardBtn = document.getElementById('next-card-btn');
-       const swapLangBtnFlashcard = document.getElementById('swap-lang-btn-flashcard');
-       const cardCounter = document.getElementById('card-counter');
-       const flashcardInstruction = document.getElementById('flashcard-instruction');
-       const backToMenuFlashcard = document.getElementById('back-to-menu-flashcard');
-       const quizView = document.getElementById('quiz-view');
-       const quizQuestion = document.getElementById('quiz-question');
-       const quizOptionsContainer = document.getElementById('quiz-options');
-       const quizFeedback = document.getElementById('quiz-feedback');
-       const nextQuestionBtn = document.getElementById('next-question-btn');
-       const swapLangBtnQuiz = document.getElementById('swap-lang-btn-quiz');
-       const quizInstruction = document.getElementById('quiz-instruction');
-       const backToMenuQuiz = document.getElementById('back-to-menu-quiz');
-       const tooltip = document.getElementById('translation-tooltip');
-       const savedListsSelect = document.getElementById('saved-lists-select');
-       const loadSavedListBtn = document.getElementById('load-saved-list-btn');
-       const deleteListBtn = document.getElementById('delete-list-btn');
-       const matchView = document.getElementById('match-view');
-       const matchEnglishColumn = document.getElementById('match-english-column');
-       const matchItalianColumn = document.getElementById('match-italian-column');
-       const nextMatchBtn = document.getElementById('next-match-btn');
-       const restartMatchBtn = document.getElementById('restart-match-btn');
-       const backToMenuMatch = document.getElementById('back-to-menu-match');
-       const matchRemainingCount = document.getElementById('match-remaining-count');
-       
-       // Modale per salvare la lista
-       const saveListModal = document.getElementById('save-list-modal');
-       const listNameInput = document.getElementById('list-name-input');
-       const confirmSaveBtn = document.getElementById('confirm-save-btn');
-       const cancelSaveBtn = document.getElementById('cancel-save-btn');
-
-       // Modale per le impostazioni
-       const settingsBtn = document.getElementById('settings-btn');
-       const settingsModal = document.getElementById('settings-modal');
-       const closeSettingsBtn = document.getElementById('close-settings-btn');
-       const flashcardOrderRadios = document.querySelectorAll('input[name="flashcard-order"]');
-       const quizOptionsCountSelect = document.getElementById('quiz-options-count');
-
        // Stato dell'applicazione
        let allCards = [];
-       let incorrectAnswers = []; // Lista delle carte con risposte sbagliate
+       let incorrectAnswers = [];
        let currentIndex = -1;
        let italianFirst = true;
        let currentQuizAnswer = '';
-       let currentQuizCard = null; // La carta corrente nel quiz
-       let longPressTimer;
+       let currentQuizCard = null;
        let currentListName = '';
-       
-       // Nuove variabili di stato per le impostazioni
        let flashcardOrder = 'random';
        let quizOptionsCount = 4;
-       
-       // Variabili per il gioco Abbinamento
        let selectedMatchCard = null;
-       let matchedCount = 0;
        let cardsToMatch = [];
        let cardsMatched = [];
+       let chatContext = "";
 
-       // --- GESTIONE VISTE ---
-       function showView(viewId) {
-           views.forEach(view => view.classList.remove('active'));
-           document.getElementById(viewId).classList.add('active');
-           // Nasconde il pulsante impostazioni nella schermata di inserimento dati
-           if (viewId === 'data-entry-view') {
-               settingsBtn.classList.add('hidden');
-           } else {
-               settingsBtn.classList.remove('hidden');
+       // --- INIZIALIZZAZIONE ---
+       document.addEventListener('DOMContentLoaded', () => {
+           // Selezione elementi DOM
+           const views = document.querySelectorAll('.view');
+           const dataInput = document.getElementById('data-input');
+           const loadDataBtn = document.getElementById('load-data-btn');
+           const aiGenerateListBtn = document.getElementById('ai-generate-list-btn');
+           const dataError = document.getElementById('data-error');
+           const selectFlashcardModeBtn = document.getElementById('select-flashcard-mode');
+           const selectQuizModeBtn = document.getElementById('select-quiz-mode');
+           const selectMatchModeBtn = document.getElementById('select-match-mode');
+           const selectChatModeBtn = document.getElementById('select-chat-mode');
+           const selectReviewModeBtn = document.getElementById('select-review-mode');
+           const backToDataBtn = document.getElementById('back-to-data-btn');
+           const flashcard = document.getElementById('flashcard');
+           const cardFrontText = document.querySelector('#card-front p');
+           const cardBackText = document.querySelector('#card-back p');
+           const nextCardBtn = document.getElementById('next-card-btn');
+           const swapLangBtnFlashcard = document.getElementById('swap-lang-btn-flashcard');
+           const cardCounter = document.getElementById('card-counter');
+           const flashcardInstruction = document.getElementById('flashcard-instruction');
+           const backToMenuFlashcard = document.getElementById('back-to-menu-flashcard');
+           const quizQuestion = document.getElementById('quiz-question');
+           const quizOptionsContainer = document.getElementById('quiz-options');
+           const quizFeedback = document.getElementById('quiz-feedback');
+           const nextQuestionBtn = document.getElementById('next-question-btn');
+           const swapLangBtnQuiz = document.getElementById('swap-lang-btn-quiz');
+           const quizInstruction = document.getElementById('quiz-instruction');
+           const backToMenuQuiz = document.getElementById('back-to-menu-quiz');
+           const savedListsSelect = document.getElementById('saved-lists-select');
+           const loadSavedListBtn = document.getElementById('load-saved-list-btn');
+           const deleteListBtn = document.getElementById('delete-list-btn');
+           const matchEnglishColumn = document.getElementById('match-english-column');
+           const matchItalianColumn = document.getElementById('match-italian-column');
+           const nextMatchBtn = document.getElementById('next-match-btn');
+           const restartMatchBtn = document.getElementById('restart-match-btn');
+           const backToMenuMatch = document.getElementById('back-to-menu-match');
+           const matchRemainingCount = document.getElementById('match-remaining-count');
+           const apiKeyInputMain = document.getElementById('api-key-input-main');
+           const saveApiKeyCheckboxMain = document.getElementById('save-api-key-checkbox-main');
+           const chatWindow = document.getElementById('chat-window');
+           const chatInput = document.getElementById('chat-input');
+           const chatSendBtn = document.getElementById('chat-send-btn');
+           const backToMenuChat = document.getElementById('back-to-menu-chat');
+           const saveListModal = document.getElementById('save-list-modal');
+           const listNameInput = document.getElementById('list-name-input');
+           const confirmSaveBtn = document.getElementById('confirm-save-btn');
+           const cancelSaveBtn = document.getElementById('cancel-save-btn');
+           const settingsBtn = document.getElementById('settings-btn');
+           const settingsModal = document.getElementById('settings-modal');
+           const closeSettingsBtn = document.getElementById('close-settings-btn');
+           const flashcardOrderRadios = document.querySelectorAll('input[name="flashcard-order"]');
+           const quizOptionsCountSelect = document.getElementById('quiz-options-count');
+           const quickChatModal = document.getElementById('quick-chat-modal');
+           const quickChatWindow = document.getElementById('quick-chat-window');
+           const quickChatInput = document.getElementById('quick-chat-input');
+           const quickChatSendBtn = document.getElementById('quick-chat-send-btn');
+           const closeQuickChatBtn = document.getElementById('close-quick-chat-btn');
+           const quickChatFlashcardBtn = document.getElementById('quick-chat-flashcard-btn');
+           const quickChatQuizBtn = document.getElementById('quick-chat-quiz-btn');
+           const quickChatMatchBtn = document.getElementById('quick-chat-match-btn');
+
+           // --- FUNZIONI DI GESTIONE VISTE E MODALI ---
+           const showView = (viewId) => {
+               views.forEach(view => view.classList.remove('active'));
+               document.getElementById(viewId).classList.add('active');
+               settingsBtn.classList.toggle('hidden', viewId === 'data-entry-view');
            }
-       }
 
-       // Funzione per mostrare il modale di salvataggio
-       function showSaveModal() {
-           saveListModal.classList.remove('hidden');
-           void saveListModal.offsetWidth;
-           saveListModal.querySelector('.save-dialog').classList.add('show');
-           listNameInput.value = currentListName;
-       }
-
-       // Funzione per nascondere il modale di salvataggio
-       function hideSaveModal() {
-           saveListModal.querySelector('.save-dialog').classList.remove('show');
-           setTimeout(() => {
-               saveListModal.classList.add('hidden');
-           }, 300);
-       }
-       
-       // Funzione per mostrare il modale delle impostazioni
-       function showSettingsModal() {
-           settingsModal.classList.remove('hidden');
-           void settingsModal.offsetWidth;
-           settingsModal.querySelector('.settings-dialog').classList.add('show');
-       }
-
-       // Funzione per nascondere il modale delle impostazioni
-       function hideSettingsModal() {
-           settingsModal.querySelector('.settings-dialog').classList.remove('show');
-           setTimeout(() => {
-               settingsModal.classList.add('hidden');
-           }, 300);
-       }
-       
-       // Event listener per il pulsante impostazioni
-       settingsBtn.addEventListener('click', showSettingsModal);
-       closeSettingsBtn.addEventListener('click', hideSettingsModal);
-       
-       // Event listener per le impostazioni
-       flashcardOrderRadios.forEach(radio => {
-           radio.addEventListener('change', (e) => {
-               flashcardOrder = e.target.value;
-           });
-       });
-       
-       quizOptionsCountSelect.addEventListener('change', (e) => {
-           quizOptionsCount = parseInt(e.target.value);
-       });
-
-       // Event listener per il pulsante di salvataggio
-       confirmSaveBtn.addEventListener('click', () => {
-           const listName = listNameInput.value.trim();
-           if (listName) {
-               saveList(listName, allCards);
-               hideSaveModal();
-               // Dopo aver salvato, si può procedere
-               showView('mode-selection-view');
+           const showModal = (modalElement) => {
+               modalElement.classList.remove('hidden');
+               setTimeout(() => modalElement.querySelector('.modal-dialog').classList.add('show'), 10);
            }
-       });
 
-       cancelSaveBtn.addEventListener('click', hideSaveModal);
-
-       // --- GESTIONE LISTE CON LOCAL STORAGE ---
-       function saveList(name, cards) {
-           const lists = JSON.parse(localStorage.getItem('flashcardLists')) || {};
-           lists[name] = cards;
-           localStorage.setItem('flashcardLists', JSON.stringify(lists));
-           loadSavedLists();
-           currentListName = name;
-       }
-
-       function loadList(name) {
-           const lists = JSON.parse(localStorage.getItem('flashcardLists')) || {};
-           if (lists[name]) {
-               allCards = lists[name];
-               incorrectAnswers = []; // Resetta la lista degli errori quando carichi una nuova lista
-               currentListName = name;
-               dataError.classList.add('hidden');
-               showView('mode-selection-view');
-               selectReviewModeBtn.classList.add('hidden');
+           const hideModal = (modalElement) => {
+               modalElement.querySelector('.modal-dialog').classList.remove('show');
+               setTimeout(() => modalElement.classList.add('hidden'), 300);
            }
-       }
 
-       function deleteList(name) {
-           if (confirm(`Sei sicuro di voler cancellare la lista "${name}"?`)) {
+           // --- LOGICA DI CARICAMENTO DATI ---
+           const handleLoadData = () => {
+               const parsedCards = parseData(dataInput.value);
+               if (parsedCards.length >= Math.max(parseInt(quizOptionsCountSelect.value), 4)) {
+                   allCards = parsedCards;
+                   incorrectAnswers = [];
+                   currentListName = '';
+                   dataError.classList.add('hidden');
+                   showModal(saveListModal);
+               } else {
+                   dataError.textContent = `Per favore, inserisci almeno ${Math.max(parseInt(quizOptionsCountSelect.value), 4)} voci valide.`;
+                   dataError.classList.remove('hidden');
+               }
+           }
+
+           const parseData = (data) => {
+               return data.trim().split('\n')
+                   .map(line => {
+                       const parts = line.split('==');
+                       if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
+                           return { english: parts[0].trim(), italian: parts[1].trim() };
+                       }
+                       return null;
+                   })
+                   .filter(card => card !== null);
+           }
+
+           // --- GESTIONE LISTE CON LOCAL STORAGE ---
+           const saveList = (name, cards) => {
                const lists = JSON.parse(localStorage.getItem('flashcardLists')) || {};
-               delete lists[name];
+               lists[name] = cards;
                localStorage.setItem('flashcardLists', JSON.stringify(lists));
                loadSavedLists();
+               currentListName = name;
            }
-       }
 
-       function loadSavedLists() {
-           const lists = JSON.parse(localStorage.getItem('flashcardLists')) || {};
-           savedListsSelect.innerHTML = '<option value="">-- Seleziona --</option>';
-           const listNames = Object.keys(lists);
-           if (listNames.length > 0) {
+           const loadList = (name) => {
+               const lists = JSON.parse(localStorage.getItem('flashcardLists')) || {};
+               if (lists[name]) {
+                   allCards = lists[name];
+                   dataInput.value = allCards.map(c => `${c.english}==${c.italian}`).join('\n');
+                   incorrectAnswers = [];
+                   currentListName = name;
+                   dataError.classList.add('hidden');
+                   showView('mode-selection-view');
+                   selectReviewModeBtn.classList.add('hidden');
+               }
+           }
+
+           const deleteList = (name) => {
+               if (confirm(`Sei sicuro di voler cancellare la lista "${name}"?`)) {
+                   const lists = JSON.parse(localStorage.getItem('flashcardLists')) || {};
+                   delete lists[name];
+                   localStorage.setItem('flashcardLists', JSON.stringify(lists));
+                   loadSavedLists();
+               }
+           }
+
+           const loadSavedLists = () => {
+               const lists = JSON.parse(localStorage.getItem('flashcardLists')) || {};
+               savedListsSelect.innerHTML = '<option value="">-- Seleziona --</option>';
+               const listNames = Object.keys(lists);
                listNames.forEach(name => {
                    const option = document.createElement('option');
                    option.value = name;
                    option.textContent = name;
                    savedListsSelect.appendChild(option);
                });
-               loadSavedListBtn.disabled = false;
-               deleteListBtn.disabled = false;
-           } else {
-               loadSavedListBtn.disabled = true;
-               deleteListBtn.disabled = true;
-           }
-       }
-
-       loadSavedLists();
-
-       loadSavedListBtn.addEventListener('click', () => {
-           const selectedList = savedListsSelect.value;
-           if (selectedList) {
-               loadList(selectedList);
-           }
-       });
-
-       deleteListBtn.addEventListener('click', () => {
-           const selectedList = savedListsSelect.value;
-           if (selectedList) {
-               deleteList(selectedList);
-           }
-       });
-
-       // --- LOGICA DI CARICAMENTO DATI ---
-       function parseData(data) {
-           return data.trim().split('\n')
-               .map(line => {
-                   const parts = line.split('==');
-                   if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
-                       return { english: parts[0].trim(), italian: parts[1].trim() };
-                   }
-                   return null;
-               })
-               .filter(card => card !== null);
-       }
-
-       loadDataBtn.addEventListener('click', () => {
-           const parsedCards = parseData(dataInput.value);
-           // Controlla che ci siano abbastanza carte per i giochi
-           if (parsedCards.length >= Math.max(quizOptionsCount, 4)) {
-               allCards = parsedCards;
-               incorrectAnswers = []; // Resetta la lista degli errori per una nuova lista
-               currentListName = '';
-               dataError.classList.add('hidden');
-               showSaveModal();
-           } else {
-               dataError.classList.remove('hidden');
-               dataError.textContent = `Per favore, inserisci almeno ${Math.max(quizOptionsCount, 4)} voci per i giochi.`
-           }
-       });
-
-       backToDataBtn.addEventListener('click', () => showView('data-entry-view'));
-
-       // --- SELEZIONE MODALITÀ ---
-       selectFlashcardModeBtn.addEventListener('click', () => {
-           setupFlashcardMode(allCards);
-           showView('flashcard-view');
-       });
-
-       selectQuizModeBtn.addEventListener('click', () => {
-           setupQuizMode(allCards);
-           showView('quiz-view');
-       });
-       
-       selectMatchModeBtn.addEventListener('click', () => {
-           setupMatchMode();
-           showView('match-view');
-       });
-
-       selectReviewModeBtn.addEventListener('click', () => {
-           setupQuizMode(incorrectAnswers);
-           showView('quiz-view');
-       });
-
-       backToMenuFlashcard.addEventListener('click', () => showView('mode-selection-view'));
-       backToMenuQuiz.addEventListener('click', () => {
-           // Se si torna al menu, controlla se mostrare il pulsante "Rivedi Errori"
-           if (incorrectAnswers.length > 0) {
-               selectReviewModeBtn.classList.remove('hidden');
-           } else {
-               selectReviewModeBtn.classList.add('hidden');
-           }
-           showView('mode-selection-view');
-       });
-       backToMenuMatch.addEventListener('click', () => showView('mode-selection-view'));
-
-       // --- LOGICA FLASHCARD ---
-       function setupFlashcardMode(cards) {
-           currentIndex = -1; // Reset per il sequenziale
-           updateFlashcardInstruction();
-           showNextCard(cards);
-       }
-
-       function showNextCard(cards) {
-           if (flashcardOrder === 'sequential') {
-               currentIndex = (currentIndex + 1) % cards.length;
-           } else { // random
-               currentIndex = Math.floor(Math.random() * cards.length);
-           }
-           
-           const card = cards[currentIndex];
-           flashcard.classList.remove('is-flipped');
-           setTimeout(() => {
-               cardFrontText.textContent = italianFirst ? card.italian : card.english;
-               cardBackText.textContent = italianFirst ? card.english : card.italian;
-           }, 150);
-           cardCounter.textContent = `Card ${currentIndex + 1} di ${cards.length}`;
-       }
-
-       function updateFlashcardInstruction() {
-           flashcardInstruction.textContent = italianFirst ? 'Italiano → Inglese' : 'Inglese → Italiano';
-       }
-
-       flashcard.addEventListener('click', () => flashcard.classList.toggle('is-flipped'));
-       nextCardBtn.addEventListener('click', () => showNextCard(allCards));
-       swapLangBtnFlashcard.addEventListener('click', () => {
-           italianFirst = !italianFirst;
-           updateFlashcardInstruction();
-           const card = allCards[currentIndex];
-           flashcard.classList.remove('is-flipped');
-           setTimeout(() => {
-               cardFrontText.textContent = italianFirst ? card.italian : card.english;
-               cardBackText.textContent = italianFirst ? card.english : card.italian;
-           }, 150);
-       });
-
-       // --- LOGICA QUIZ ---
-       function setupQuizMode(cardsToQuiz) {
-           if (cardsToQuiz === incorrectAnswers) {
-               swapLangBtnQuiz.style.display = 'none';
-               quizInstruction.textContent = `Rivedi i tuoi ${incorrectAnswers.length} errori!`;
-           } else {
-               swapLangBtnQuiz.style.display = 'block';
-               updateQuizInstruction();
-           }
-           generateQuizQuestion(cardsToQuiz);
-       }
-
-       function updateQuizInstruction() {
-           quizInstruction.textContent = italianFirst ? 'Italiano → Inglese' : 'Inglese → Italiano';
-       }
-
-       function generateQuizQuestion(cardsToQuiz) {
-           quizFeedback.textContent = '';
-           nextQuestionBtn.classList.add('hidden');
-           swapLangBtnQuiz.disabled = false;
-
-           // Se la lista di quiz è vuota (es. tutti gli errori sono stati corretti), si torna al menu
-           if (cardsToQuiz.length === 0) {
-               // Nuova logica: avvisa l'utente e torna al menu
-               quizFeedback.textContent = 'Hai corretto tutti gli errori! 🎉 Torno al menu...';
-               setTimeout(() => {
-                   backToMenuQuiz.click();
-               }, 2000); // Torna al menu dopo 2 secondi
-               return;
+               loadSavedListBtn.disabled = listNames.length === 0;
+               deleteListBtn.disabled = listNames.length === 0;
            }
 
-           const correctCardIndex = Math.floor(Math.random() * cardsToQuiz.length);
-           const correctCard = cardsToQuiz[correctCardIndex];
-           currentQuizCard = correctCard;
-
-           const questionTerm = italianFirst ? correctCard.italian : correctCard.english;
-           currentQuizAnswer = italianFirst ? correctCard.english : correctCard.italian;
-           quizQuestion.textContent = questionTerm;
-
-           let options = [correctCard];
-           // Scegli le opzioni sbagliate dalla lista completa, escludendo la parola corretta
-           const otherCards = allCards.filter(card => card !== correctCard);
-           otherCards.sort(() => 0.5 - Math.random());
-           for (let i = 0; i < quizOptionsCount - 1 && i < otherCards.length; i++) {
-               options.push(otherCards[i]);
+           // --- LOGICA CHATBOT (UNIFICATA) ---
+           const openQuickChat = (initialBotMessage) => {
+               quickChatWindow.innerHTML = '';
+               appendQuickChatMessage(initialBotMessage, 'bot');
+               showModal(quickChatModal);
            }
-           options.sort(() => 0.5 - Math.random());
 
-           quizOptionsContainer.innerHTML = '';
-           options.forEach(card => {
-               const button = document.createElement('button');
-               button.className = "quiz-option w-full p-3 bg-white border-2 border-gray-300 rounded-lg hover:border-blue-500 transition text-sm md:text-base text-gray-800";
-               const optionText = italianFirst ? card.english : card.italian;
-               button.textContent = optionText;
-               // Imposta un attributo data-translation più affidabile
-               button.dataset.translation = italianFirst ? card.italian : card.english;
-               button.addEventListener('click', handleAnswerClick);
-               // Rimosso: addLongPressListeners(button);
-               quizOptionsContainer.appendChild(button);
-           });
-           
-           if (quizOptionsCount > 4) {
-               quizOptionsContainer.classList.remove('grid-cols-2');
-               quizOptionsContainer.classList.add('grid-cols-2', 'md:grid-cols-3');
-           } else {
-               quizOptionsContainer.classList.remove('md:grid-cols-3');
-               quizOptionsContainer.classList.add('grid-cols-2');
+           const openAIGenerateListChat = () => {
+               chatContext = "GENERATE_LIST";
+               openQuickChat("Ciao! Che tipo di lista di vocaboli vuoi creare? (es. `animali`, `cibo`, `verbi comuni`)");
            }
-       }
 
-       function handleAnswerClick(event) {
-           const selectedButton = event.target;
-           const selectedAnswer = selectedButton.textContent;
-           swapLangBtnQuiz.disabled = true;
-
-           const allButtons = quizOptionsContainer.querySelectorAll('button');
-           allButtons.forEach(btn => {
-               btn.removeEventListener('click', handleAnswerClick);
-               btn.disabled = true;
-           });
-
-           // Trova il pulsante con la risposta corretta
-           const correctAnswerButton = Array.from(allButtons).find(btn => btn.textContent === currentQuizAnswer);
-
-           if (selectedAnswer === currentQuizAnswer) {
-               quizFeedback.textContent = 'Corretto! 🎉';
-               quizFeedback.className = 'text-center font-bold mt-4 h-6 text-green-600';
-               selectedButton.classList.add('selected-correct');
-               // Se la risposta è corretta, rimuovi la carta dall'array incorrectAnswers
-               if (incorrectAnswers.includes(currentQuizCard)) {
-                   incorrectAnswers = incorrectAnswers.filter(card => card !== currentQuizCard);
-               }
-           } else {
-               quizFeedback.textContent = 'Sbagliato. 😕';
-               quizFeedback.className = 'text-center font-bold mt-4 h-6 text-red-600';
-               selectedButton.classList.add('selected-incorrect');
-               correctAnswerButton.classList.add('correct-answer');
-               // Aggiungi la carta agli errori
-               if (currentQuizCard && !incorrectAnswers.includes(currentQuizCard)) {
-                   incorrectAnswers.push(currentQuizCard);
-               }
-           }
-           
-           nextQuestionBtn.classList.remove('hidden');
-
-           // Aggiungi i listener long-press per poter rivedere la traduzione dopo la risposta
-           allButtons.forEach(btn => addLongPressListeners(btn));
-       }
-       
-       nextQuestionBtn.addEventListener('click', () => {
-           const cardsToQuiz = incorrectAnswers.length > 0 && quizInstruction.textContent.includes('errori') ? incorrectAnswers : allCards;
-           generateQuizQuestion(cardsToQuiz);
-           if (incorrectAnswers.length === 0 && quizInstruction.textContent.includes('errori')) {
-               // Se la lista degli errori è finita, nascondi il pulsante e torna al menu
-               selectReviewModeBtn.classList.add('hidden');
-               quizFeedback.textContent = 'Hai finito di rivedere gli errori! 🎉 Torno al menu...';
-               setTimeout(() => {
-                   backToMenuQuiz.click();
-               }, 2000);
-           }
-       });
-
-       swapLangBtnQuiz.addEventListener('click', () => {
-           italianFirst = !italianFirst;
-           updateQuizInstruction();
-           generateQuizQuestion(allCards);
-       });
-       
-       // --- LOGICA GIOCO ABBINAMENTO MIGLIORATA ---
-       function setupMatchMode() {
-           selectedMatchCard = null;
-           matchedCount = 0;
-           // Mischi le carte una volta e le assegno alla lista da abbinare
-           cardsToMatch = [...allCards].sort(() => 0.5 - Math.random());
-           cardsMatched = [];
-           loadNextMatchSet();
-       }
-
-       function loadNextMatchSet() {
-           matchEnglishColumn.innerHTML = '';
-           matchItalianColumn.innerHTML = '';
-           selectedMatchCard = null;
-           
-           const remainingCards = cardsToMatch.filter(card => !cardsMatched.includes(card.english));
-           
-           if (remainingCards.length === 0) {
-               // Tutte le coppie sono state abbinate
-               matchEnglishColumn.innerHTML = '<p class="text-center text-xl text-green-600 font-bold">Hai abbinato tutte le coppie! 🎉</p>';
-               matchItalianColumn.innerHTML = '';
-               nextMatchBtn.classList.add('hidden');
-               matchRemainingCount.textContent = '0';
-               return;
-           }
-           
-           nextMatchBtn.classList.add('hidden');
-           const setSize = Math.min(4, remainingCards.length);
-           const currentSet = remainingCards.slice(0, setSize);
-           
-           const englishWords = currentSet.map(c => c.english).sort(() => 0.5 - Math.random());
-           const italianWords = currentSet.map(c => c.italian).sort(() => 0.5 - Math.random());
-           
-           englishWords.forEach(word => {
-               const button = document.createElement('button');
-               button.className = "match-option w-full p-3 bg-white border-2 border-gray-300 rounded-lg hover:border-blue-500 transition text-sm md:text-base text-gray-800";
-               button.textContent = word;
-               button.dataset.word = word;
-               button.dataset.lang = 'english';
-               button.addEventListener('click', handleMatchClick);
-               matchEnglishColumn.appendChild(button);
-           });
-           
-           italianWords.forEach(word => {
-               const button = document.createElement('button');
-               button.className = "match-option w-full p-3 bg-white border-2 border-gray-300 rounded-lg hover:border-blue-500 transition text-sm md:text-base text-gray-800";
-               button.textContent = word;
-               button.dataset.word = word;
-               button.dataset.lang = 'italian';
-               button.addEventListener('click', handleMatchClick);
-               matchItalianColumn.appendChild(button);
-           });
-
-           matchRemainingCount.textContent = remainingCards.length;
-       }
-
-       function handleMatchClick(event) {
-           const clickedButton = event.target;
-           
-           if (clickedButton.classList.contains('matched')) return;
-           
-           if (selectedMatchCard) {
-               // Abbiamo già una carta selezionata
-               if (selectedMatchCard === clickedButton) {
-                   // Cliccato sulla stessa carta, deseleziona
-                   selectedMatchCard.classList.remove('selected');
-                   selectedMatchCard = null;
+           const handleQuickChatSend = async () => {
+               const userMessage = quickChatInput.value.trim();
+               const apiKey = apiKeyInputMain.value.trim();
+               if (!apiKey) {
+                   alert('Per favore, inserisci la tua chiave API di Google AI per continuare.');
                    return;
                }
-               
-               // Controlla che le due carte non siano della stessa lingua
-               if (selectedMatchCard.dataset.lang === clickedButton.dataset.lang) {
-                   selectedMatchCard.classList.remove('selected');
-                   
-                   selectedMatchCard = clickedButton;
-                   clickedButton.classList.add('selected');
-                   return;
-               }
-               
-               // Proviamo a fare un match
-               const englishWord = selectedMatchCard.dataset.lang === 'english' ? selectedMatchCard.dataset.word : clickedButton.dataset.word;
-               const italianWord = selectedMatchCard.dataset.lang === 'italian' ? selectedMatchCard.dataset.word : clickedButton.dataset.word;
-               
-               const originalCard = allCards.find(c => c.english === englishWord && c.italian === italianWord);
-               
-               if (originalCard) {
-                   // Match corretto!
-                   clickedButton.classList.add('matched');
-                   selectedMatchCard.classList.add('matched');
-                   selectedMatchCard.classList.remove('selected');
-                   selectedMatchCard = null;
-                   
-                   cardsMatched.push(englishWord);
-                   
-                   if (cardsMatched.length % 4 === 0 || cardsMatched.length === allCards.length) {
-                       // Tutte le coppie del set sono state abbinate
-                       nextMatchBtn.classList.remove('hidden');
-                       if (cardsMatched.length === allCards.length) {
-                           nextMatchBtn.textContent = 'Hai finito! 🎉';
-                           nextMatchBtn.disabled = true;
-                       } else {
-                           nextMatchBtn.textContent = 'Prossimo Set →';
-                           nextMatchBtn.disabled = false;
-                       }
-                   }
+               if (!userMessage) return;
 
+               appendQuickChatMessage(userMessage, 'user');
+               quickChatInput.value = '';
+               appendQuickChatMessage('...', 'bot', true);
+
+               try {
+                   let responseText;
+                   if (chatContext === "GENERATE_LIST") {
+                       const prompt = `Sei un assistente per l'apprendimento delle lingue. Crea una lista di 15 vocaboli sul tema "${userMessage}". Rispondi SOLO con la lista nel formato 'Inglese==Italiano', una voce per riga. Non aggiungere altre frasi o spiegazioni.`;
+                       responseText = await callGeminiAPI(prompt, apiKey);
+                       dataInput.value = responseText;
+                       appendQuickChatMessage("Ecco la tua lista! L'ho inserita nell'area di testo. Puoi modificarla o cliccare 'Inizia'.", 'bot');
+                   } else {
+                       const prompt = `${chatContext}\n\nDomanda utente: "${userMessage}"\n\nRispondi alla domanda dell'utente in modo conciso e utile per chi impara l'inglese.`;
+                       responseText = await callGeminiAPI(prompt, apiKey);
+                       appendQuickChatMessage(responseText, 'bot');
+                   }
+               } catch (error) {
+                   appendQuickChatMessage(`Si è verificato un errore: ${error.message}.`, 'bot');
+               } finally {
+                   removeTypingIndicator(quickChatWindow);
+               }
+           }
+
+            const handleMainChatSend = async () => {
+                const userMessage = chatInput.value.trim();
+                const apiKey = apiKeyInputMain.value.trim();
+                if (!apiKey) {
+                    alert('Per favore, inserisci la tua chiave API di Google AI per continuare.');
+                    return;
+                }
+                if (!userMessage) return;
+
+                appendMainChatMessage(userMessage, 'user');
+                chatInput.value = '';
+                appendMainChatMessage('...', 'bot', true);
+
+                try {
+                    const prompt = `Sei un assistente AI generico. Rispondi alla domanda dell'utente. Domanda: "${userMessage}"`;
+                    const responseText = await callGeminiAPI(prompt, apiKey);
+                    appendMainChatMessage(responseText, 'bot');
+                } catch (error) {
+                    appendMainChatMessage(`Si è verificato un errore: ${error.message}.`, 'bot');
+                } finally {
+                    removeTypingIndicator(chatWindow);
+                }
+            }
+
+           const callGeminiAPI = async (prompt, apiKey) => {
+               const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+               const response = await fetch(API_URL, {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+               });
+               if (!response.ok) {
+                   const errorData = await response.json();
+                   throw new Error(errorData.error.message || 'Errore API');
+               }
+               const data = await response.json();
+               return data.candidates[0].content.parts[0].text;
+           }
+
+           const appendQuickChatMessage = (text, sender, isTyping = false) => {
+               appendMessage(text, sender, quickChatWindow, isTyping);
+           }
+           const appendMainChatMessage = (text, sender, isTyping = false) => {
+               appendMessage(text, sender, chatWindow, isTyping);
+           }
+
+           const appendMessage = (text, sender, windowElement, isTyping = false) => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `${sender}-message`;
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                if (isTyping) bubble.id = `typing-indicator-${windowElement.id}`;
+                messageDiv.appendChild(bubble);
+                windowElement.appendChild(messageDiv);
+                windowElement.scrollTop = windowElement.scrollHeight;
+           }
+
+           const removeTypingIndicator = (windowElement) => {
+               const indicator = document.getElementById(`typing-indicator-${windowElement.id}`);
+               if (indicator) indicator.parentElement.remove();
+           }
+
+           // --- LOGICA FLASHCARD ---
+           const setupFlashcardMode = (cards) => {
+               currentIndex = -1;
+               updateFlashcardInstruction();
+               showNextCard(cards);
+           }
+
+           const showNextCard = (cards, animate = true) => {
+               if (flashcardOrder === 'sequential') {
+                   currentIndex = (currentIndex + 1) % cards.length;
                } else {
-                   // Match sbagliato
-                   clickedButton.classList.add('bg-red-500', 'text-white');
-                   selectedMatchCard.classList.add('bg-red-500', 'text-white');
-                   
-                   setTimeout(() => {
-                       clickedButton.classList.remove('bg-red-500', 'text-white');
-                       selectedMatchCard.classList.remove('bg-red-500', 'text-white', 'selected');
-                       selectedMatchCard = null;
-                   }, 500);
+                   currentIndex = Math.floor(Math.random() * cards.length);
                }
-           } else {
-               // Nessuna carta selezionata, seleziona la corrente
-               selectedMatchCard = clickedButton;
-               selectedMatchCard.classList.add('selected');
+               const card = cards[currentIndex];
+               if (animate) flashcard.classList.remove('is-flipped');
+               setTimeout(() => {
+                   cardFrontText.textContent = italianFirst ? card.italian : card.english;
+                   cardBackText.textContent = italianFirst ? card.english : card.italian;
+               }, animate ? 150 : 0);
+               cardCounter.textContent = `Card ${currentIndex + 1} di ${cards.length}`;
            }
-       }
-       
-       nextMatchBtn.addEventListener('click', loadNextMatchSet);
-       restartMatchBtn.addEventListener('click', () => {
-           if (confirm("Sei sicuro di voler ricominciare il gioco dall'inizio?")) {
-               setupMatchMode();
+
+           const updateFlashcardInstruction = () => {
+               flashcardInstruction.textContent = italianFirst ? 'Italiano → Inglese' : 'Inglese → Italiano';
            }
-       });
 
-       // --- LOGICA LONG-PRESS E TOOLTIP ---
-       function addLongPressListeners(element) {
-           element.addEventListener('mousedown', handlePressStart);
-           element.addEventListener('touchstart', handlePressStart, { passive: true });
-           element.addEventListener('mouseup', handlePressEnd);
-           element.addEventListener('mouseleave', handlePressEnd);
-           element.addEventListener('touchend', handlePressEnd);
-       }
-       
-       function removeLongPressListeners(element) {
-           element.removeEventListener('mousedown', handlePressStart);
-           element.removeEventListener('touchstart', handlePressStart, { passive: true });
-           element.removeEventListener('mouseup', handlePressEnd);
-           element.removeEventListener('mouseleave', handlePressEnd);
-           element.removeEventListener('touchend', handlePressEnd);
-       }
+           // --- LOGICA QUIZ ---
+           const setupQuizMode = (cardsToQuiz) => {
+               if (cardsToQuiz === incorrectAnswers) {
+                   swapLangBtnQuiz.style.display = 'none';
+                   quizInstruction.textContent = `Rivedi i tuoi ${incorrectAnswers.length} errori!`;
+               } else {
+                   swapLangBtnQuiz.style.display = 'block';
+                   updateQuizInstruction();
+               }
+               generateQuizQuestion(cardsToQuiz);
+           }
 
-       function handlePressStart(e) {
-           const button = e.currentTarget;
-           longPressTimer = setTimeout(() => {
-               // Corretto: ora usa gli attributi della parola cliccata
-               const questionWord = italianFirst ? button.dataset.translation : button.textContent;
-               const answerWord = italianFirst ? button.textContent : button.dataset.translation;
+           const updateQuizInstruction = () => {
+               quizInstruction.textContent = italianFirst ? 'Italiano → Inglese' : 'Inglese → Italiano';
+           }
+
+           const generateQuizQuestion = (cardsToQuiz) => {
+               quizFeedback.textContent = '';
+               nextQuestionBtn.classList.add('hidden');
+               swapLangBtnQuiz.disabled = false;
+
+               if (cardsToQuiz.length === 0) {
+                   quizFeedback.textContent = 'Hai corretto tutti gli errori! 🎉';
+                   setTimeout(() => backToMenuQuiz.click(), 2000);
+                   return;
+               }
+
+               const correctCardIndex = Math.floor(Math.random() * cardsToQuiz.length);
+               const correctCard = cardsToQuiz[correctCardIndex];
+               currentQuizCard = correctCard;
+
+               const questionTerm = italianFirst ? correctCard.italian : correctCard.english;
+               currentQuizAnswer = italianFirst ? correctCard.english : correctCard.italian;
+               quizQuestion.textContent = questionTerm;
+
+               let options = [correctCard];
+               const otherCards = allCards.filter(card => card !== correctCard);
+               otherCards.sort(() => 0.5 - Math.random());
+               for (let i = 0; i < parseInt(quizOptionsCountSelect.value) - 1 && i < otherCards.length; i++) {
+                   options.push(otherCards[i]);
+               }
+               options.sort(() => 0.5 - Math.random());
+
+               quizOptionsContainer.innerHTML = '';
+               options.forEach(card => {
+                   const button = document.createElement('button');
+                   button.className = "quiz-option w-full p-3 bg-white border-2 border-gray-300 rounded-lg hover:border-blue-500 transition text-sm md:text-base text-gray-800";
+                   button.textContent = italianFirst ? card.english : card.italian;
+                   button.addEventListener('click', handleAnswerClick);
+                   quizOptionsContainer.appendChild(button);
+               });
+           }
+
+           const handleAnswerClick = (event) => {
+               const selectedButton = event.target;
+               const selectedAnswer = selectedButton.textContent;
+               swapLangBtnQuiz.disabled = true;
+
+               const allButtons = quizOptionsContainer.querySelectorAll('button');
+               allButtons.forEach(btn => btn.disabled = true);
+
+               const correctAnswerButton = Array.from(allButtons).find(btn => btn.textContent === currentQuizAnswer);
+
+               if (selectedAnswer === currentQuizAnswer) {
+                   quizFeedback.textContent = 'Corretto! 🎉';
+                   quizFeedback.className = 'text-center font-bold mt-4 h-6 text-green-600';
+                   selectedButton.classList.add('selected-correct');
+                   if (incorrectAnswers.includes(currentQuizCard)) {
+                       incorrectAnswers = incorrectAnswers.filter(card => card !== currentQuizCard);
+                   }
+               } else {
+                   quizFeedback.textContent = 'Sbagliato. 😕';
+                   quizFeedback.className = 'text-center font-bold mt-4 h-6 text-red-600';
+                   selectedButton.classList.add('selected-incorrect');
+                   if(correctAnswerButton) correctAnswerButton.classList.add('correct-answer');
+                   if (currentQuizCard && !incorrectAnswers.includes(currentQuizCard)) {
+                       incorrectAnswers.push(currentQuizCard);
+                   }
+               }
+               nextQuestionBtn.classList.remove('hidden');
+           }
+
+           // --- LOGICA GIOCO ABBINAMENTO ---
+           const setupMatchMode = () => {
+               selectedMatchCard = null;
+               cardsToMatch = [...allCards].sort(() => 0.5 - Math.random());
+               cardsMatched = [];
+               loadNextMatchSet();
+           }
+
+           const loadNextMatchSet = () => {
+               matchEnglishColumn.innerHTML = '';
+               matchItalianColumn.innerHTML = '';
+               selectedMatchCard = null;
                
-               showTooltip(button, `<b>${questionWord}</b><br>${answerWord}`);
-           }, 500);
-       }
+               const remainingCards = cardsToMatch.filter(card => !cardsMatched.includes(card.english));
+               
+               if (remainingCards.length === 0) {
+                   matchEnglishColumn.innerHTML = '<p class="text-center text-xl text-green-600 font-bold">Hai abbinato tutte le coppie! 🎉</p>';
+                   nextMatchBtn.classList.add('hidden');
+                   matchRemainingCount.textContent = '0';
+                   return;
+               }
+               
+               nextMatchBtn.classList.add('hidden');
+               const setSize = Math.min(4, remainingCards.length);
+               const currentSet = remainingCards.slice(0, setSize);
+               
+               const englishWords = currentSet.map(c => c.english).sort(() => 0.5 - Math.random());
+               const italianWords = currentSet.map(c => c.italian).sort(() => 0.5 - Math.random());
+               
+               englishWords.forEach(word => createMatchButton(word, 'english', matchEnglishColumn));
+               italianWords.forEach(word => createMatchButton(word, 'italian', matchItalianColumn));
 
-       function handlePressEnd(e) {
-           clearTimeout(longPressTimer);
-           hideTooltip();
-       }
+               matchRemainingCount.textContent = remainingCards.length;
+           }
 
-       function showTooltip(element, text) {
-           tooltip.innerHTML = text;
-           const rect = element.getBoundingClientRect();
-           tooltip.style.left = `${rect.left + rect.width / 2}px`;
-           tooltip.style.top = `${rect.top}px`;
-           tooltip.style.transform = 'translate(-50%, -110%)';
-           tooltip.classList.remove('hidden');
-           void tooltip.offsetWidth;
-           tooltip.classList.add('visible');
-       }
+           const createMatchButton = (word, lang, column) => {
+                const button = document.createElement('button');
+                button.className = "match-option w-full p-3 bg-white border-2 border-gray-300 rounded-lg hover:border-blue-500 transition text-sm md:text-base text-gray-800";
+                button.textContent = word;
+                button.dataset.word = word;
+                button.dataset.lang = lang;
+                button.addEventListener('click', handleMatchClick);
+                column.appendChild(button);
+           }
 
-       function hideTooltip() {
-           tooltip.classList.remove('visible');
-           setTimeout(() => {
-               tooltip.classList.add('hidden');
-           }, 200);
-       }
+           const handleMatchClick = (event) => {
+               const clickedButton = event.target;
+               if (clickedButton.classList.contains('matched')) return;
+               
+               if (selectedMatchCard) {
+                   if (selectedMatchCard === clickedButton) {
+                       selectedMatchCard.classList.remove('selected');
+                       selectedMatchCard = null;
+                       return;
+                   }
+                   
+                   if (selectedMatchCard.dataset.lang === clickedButton.dataset.lang) {
+                       selectedMatchCard.classList.remove('selected');
+                       selectedMatchCard = clickedButton;
+                       clickedButton.classList.add('selected');
+                       return;
+                   }
+                   
+                   const englishWord = selectedMatchCard.dataset.lang === 'english' ? selectedMatchCard.dataset.word : clickedButton.dataset.word;
+                   const italianWord = selectedMatchCard.dataset.lang === 'italian' ? selectedMatchCard.dataset.word : clickedButton.dataset.word;
+                   
+                   const originalCard = allCards.find(c => c.english === englishWord && c.italian === italianWord);
+                   
+                   if (originalCard) {
+                       clickedButton.classList.add('matched');
+                       selectedMatchCard.classList.add('matched');
+                       selectedMatchCard.classList.remove('selected');
+                       selectedMatchCard = null;
+                       cardsMatched.push(englishWord);
+                       
+                       if (cardsMatched.length % 4 === 0 || cardsMatched.length === allCards.length) {
+                           nextMatchBtn.classList.remove('hidden');
+                           if (cardsMatched.length === allCards.length) {
+                               nextMatchBtn.textContent = 'Hai finito! 🎉';
+                               nextMatchBtn.disabled = true;
+                           }
+                       }
+                   } else {
+                       clickedButton.classList.add('bg-red-500', 'text-white');
+                       selectedMatchCard.classList.add('bg-red-500', 'text-white');
+                       setTimeout(() => {
+                           clickedButton.classList.remove('bg-red-500', 'text-white');
+                           selectedMatchCard.classList.remove('bg-red-500', 'text-white', 'selected');
+                           selectedMatchCard = null;
+                       }, 500);
+                   }
+               } else {
+                   selectedMatchCard = clickedButton;
+                   selectedMatchCard.classList.add('selected');
+               }
+           }
 
-       // --- INIZIALIZZAZIONE ---
-       showView('data-entry-view');
-       
+           // INIZIALIZZAZIONE VISTA E DATI
+           showView('data-entry-view');
+           loadSavedLists();
+           const savedKey = localStorage.getItem('google_ai_api_key');
+           if (savedKey) {
+               apiKeyInputMain.value = savedKey;
+               saveApiKeyCheckboxMain.checked = true;
+           }
+
+           // EVENT LISTENERS
+           loadDataBtn.addEventListener('click', handleLoadData);
+           backToDataBtn.addEventListener('click', () => showView('data-entry-view'));
+           selectFlashcardModeBtn.addEventListener('click', () => { setupFlashcardMode(allCards); showView('flashcard-view'); });
+           selectQuizModeBtn.addEventListener('click', () => { setupQuizMode(allCards); showView('quiz-view'); });
+           selectMatchModeBtn.addEventListener('click', () => { setupMatchMode(); showView('match-view'); });
+           selectChatModeBtn.addEventListener('click', () => { chatContext = ''; showView('chat-view'); });
+           selectReviewModeBtn.addEventListener('click', () => { setupQuizMode(incorrectAnswers); showView('quiz-view'); }); // FIX: Passa `incorrectAnswers`
+           loadSavedListBtn.addEventListener('click', () => { if(savedListsSelect.value) loadList(savedListsSelect.value); });
+           deleteListBtn.addEventListener('click', () => { if(savedListsSelect.value) deleteList(savedListsSelect.value); });
+           confirmSaveBtn.addEventListener('click', () => {
+               const listName = listNameInput.value.trim();
+               if (listName) {
+                   saveList(listName, allCards);
+                   hideModal(saveListModal);
+                   showView('mode-selection-view');
+               }
+           });
+           cancelSaveBtn.addEventListener('click', () => hideModal(saveListModal));
+           settingsBtn.addEventListener('click', () => showModal(settingsModal));
+           closeSettingsBtn.addEventListener('click', () => hideModal(settingsModal));
+           flashcardOrderRadios.forEach(radio => radio.addEventListener('change', (e) => flashcardOrder = e.target.value));
+           quizOptionsCountSelect.addEventListener('change', (e) => quizOptionsCount = parseInt(e.target.value));
+           saveApiKeyCheckboxMain.addEventListener('change', () => {
+                if (saveApiKeyCheckboxMain.checked) {
+                   localStorage.setItem('google_ai_api_key', apiKeyInputMain.value.trim());
+               } else {
+                   localStorage.removeItem('google_ai_api_key');
+               }
+           });
+           aiGenerateListBtn.addEventListener('click', openAIGenerateListChat);
+           quickChatSendBtn.addEventListener('click', handleQuickChatSend);
+           quickChatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleQuickChatSend(); });
+           chatSendBtn.addEventListener('click', handleMainChatSend); // FIX: Aggiunto listener
+           chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleMainChatSend(); }); // FIX: Aggiunto listener
+           closeQuickChatBtn.addEventListener('click', () => hideModal(quickChatModal));
+           quickChatFlashcardBtn.addEventListener('click', () => {
+               if (currentIndex === -1 || !allCards[currentIndex]) {
+                   alert("Per favore, visualizza almeno una carta prima di usare l'AI.");
+                   return;
+               }
+               const currentCard = allCards[currentIndex];
+               chatContext = `Riguardo alla parola "${currentCard.english}" (che significa "${currentCard.italian}"), rispondi alla seguente domanda:`
+               openQuickChat(`Cosa vuoi sapere su **${currentCard.english}**?`);
+           });
+           quickChatQuizBtn.addEventListener('click', () => {
+               if (!currentQuizCard) {
+                   alert("Attendi la prossima domanda prima di usare l'AI.");
+                   return;
+               }
+               const currentCard = currentQuizCard;
+               chatContext = `Riguardo alla parola "${currentCard.english}" (che significa "${currentCard.italian}"), rispondi alla seguente domanda:`
+               openQuickChat(`Cosa vuoi sapere sulla domanda del quiz?`);
+           });
+           quickChatMatchBtn.addEventListener('click', () => {
+               chatContext = `Sto giocando al gioco di abbinamento. Le parole rimanenti sono: ${cardsToMatch.filter(c => !cardsMatched.includes(c.english)).map(c=>c.english).join(', ')}. Rispondi alla seguente domanda:`
+               openQuickChat('Cosa vuoi chiedere sul gioco di abbinamento?');
+           });
+           backToMenuFlashcard.addEventListener('click', () => showView('mode-selection-view'));
+           backToMenuQuiz.addEventListener('click', () => {
+               if (incorrectAnswers.length > 0) {
+                   selectReviewModeBtn.classList.remove('hidden');
+               } else {
+                   selectReviewModeBtn.classList.add('hidden');
+               }
+               showView('mode-selection-view');
+           });
+           backToMenuMatch.addEventListener('click', () => showView('mode-selection-view'));
+           backToMenuChat.addEventListener('click', () => showView('mode-selection-view'));
+           flashcard.addEventListener('click', () => flashcard.classList.toggle('is-flipped'));
+           nextCardBtn.addEventListener('click', () => showNextCard(allCards));
+           swapLangBtnFlashcard.addEventListener('click', () => {
+               italianFirst = !italianFirst;
+               updateFlashcardInstruction();
+               showNextCard(allCards, false);
+           });
+           nextQuestionBtn.addEventListener('click', () => {
+               const cardsToQuiz = quizInstruction.textContent.includes('errori') ? incorrectAnswers : allCards;
+               generateQuizQuestion(cardsToQuiz);
+           });
+           swapLangBtnQuiz.addEventListener('click', () => {
+               italianFirst = !italianFirst;
+               updateQuizInstruction();
+               generateQuizQuestion(allCards);
+           });
+           nextMatchBtn.addEventListener('click', loadNextMatchSet);
+           restartMatchBtn.addEventListener('click', () => {
+               if (confirm("Sei sicuro di voler ricominciare?")) setupMatchMode();
+           });
+       });
    </script>
 </body>
 </html>
